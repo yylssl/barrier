@@ -108,6 +108,9 @@ protected:
     virtual void        updateButtons();
     virtual IKeyState*    getKeyState() const;
 
+protected:
+    virtual void executeScript(const std::string& fileName) const;
+
 private:
     void                updateScreenShape();
     void                updateScreenShape(const CGDirectDisplayID, const CGDisplayChangeSummaryFlags);

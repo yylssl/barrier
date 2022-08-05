@@ -853,6 +853,10 @@ OSXScreen::enter()
 
 	// now on screen
 	m_isOnScreen = true;
+
+	std::string scriptFile = getenv("HOME");
+	scriptFile += "/.barrier/enter.sh";
+	executeScript(scriptFile);
 }
 
 bool
@@ -893,6 +897,10 @@ OSXScreen::leave()
 
 	// now off screen
 	m_isOnScreen = false;
+
+	std::string scriptFile = getenv("HOME");
+	scriptFile += "/.barrier/leave.sh";
+	executeScript(scriptFile);
 
 	return true;
 }
@@ -1513,6 +1521,29 @@ IKeyState*
 OSXScreen::getKeyState() const
 {
 	return m_keyState;
+}
+
+void
+OSXScreen::executeScript(const std::string& fileName) const
+{
+	if (!fileName.empty()) {
+		LOG((CLOG_INFO "Running shell script \"%s\"", fileName.c_str()));
+
+		signal(SIGCHLD, SIG_IGN);
+
+		if (!access(fileName.c_str(), X_OK)) {
+			pid_t pid = fork();
+			if (pid == 0) {
+				execl(fileName.c_str(), fileName.c_str(),NULL);
+				exit(0);
+			} else if (pid < 0) {
+				LOG((CLOG_ERR "Script forking error"));
+				exit(1);
+			}
+		} else {
+			LOG((CLOG_ERR "Script not accessible \"%s\"", fileName.c_str()));
+		}
+	}
 }
 
 void
